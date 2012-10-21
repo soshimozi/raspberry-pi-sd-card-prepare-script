@@ -170,8 +170,8 @@ w
 EOF
 
 echo "Formatting Boot Partition"
-mkfs.msdos -F 32 $SELECTEDIDENTIFIER"1" -n BOOTPART >/dev/null
+mkfs.msdos -F 32 $SELECTEDIDENTIFIER"1" -n BOOTPART > /dev/null 2>&1 
 
 echo "Formatting Linux Partition"
-sudo mkfs.ext3 $SELECTEDIDENTIFIER"2" -L LINUXPART >/dev/null
+sudo mkfs.ext3 $SELECTEDIDENTIFIER"2" -L LINUXPART > /dev/null 2>&1
 
