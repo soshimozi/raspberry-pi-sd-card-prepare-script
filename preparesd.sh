@@ -142,7 +142,7 @@ o
 w
 EOF
 
-echo "Setting up Paritions"
+echo "Setting Up Partitions"
 fdisk $SELECTEDIDENTIFIER >/dev/null 2>&1 <<EOF
 x
 h
