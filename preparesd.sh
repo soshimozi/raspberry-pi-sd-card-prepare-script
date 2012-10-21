@@ -182,5 +182,7 @@ mount ${SELECTEDIDENTIFIER}"1" /media/BOOTPART
 mkdir -p /media/LINUXPART
 mount ${SELECTEDIDENTIFIER}"2" /media/LINUXPART
 
-echo "SDCard is prepared and ready for copying of boot loader files"
+echo ""
+echo "${bldwht}SDCard is prepared and ready for copying of boot loader files"
+echo "${txtrst}"
 
