@@ -1,0 +1,7 @@
+This is a script that will help you prepare your SD Card for Raspberry Pi embedded Linux developoment.  It will partition and format your card with the most basic options necessary to boot your image.
+
+!!IMPORTANT!!
+Improper usage of this script, EXPECIALLY NOT IDENTIFYING THE CORRECT SDCARD, will result in loss of data and you could potentially render your system unbootable.  It is important that you identify your SD Card correctly at the begging of the script.  If you have any doubts, press Ctrl-C and seek someone more knowledgable than you.  Proceed at your own risk.  
+
+DISCLAIMER
+I am not responsible for any data loss or equipment failure and I make no claims, promises, or guarantees about the accuracy, completeness, or adequacy of the contents of this script, and I expressly disclaim liability for errors and omissions in the contents of this script. No warranty of any kind, implied, expressed, or statutory, including but not limited to the warranties of non-infringement of third party rights, title, merchantability, fitness for a particular purpose or freedom from computer virus, is given with respect to the contents of this script.
