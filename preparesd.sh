@@ -173,5 +173,14 @@ echo "Formatting Boot Partition"
 mkfs.msdos -F 32 $SELECTEDIDENTIFIER"1" -n BOOTPART > /dev/null 2>&1 
 
 echo "Formatting Linux Partition"
-sudo mkfs.ext3 $SELECTEDIDENTIFIER"2" -L LINUXPART > /dev/null 2>&1
+mkfs.ext3 $SELECTEDIDENTIFIER"2" -L LINUXPART > /dev/null 2>&1
+
+echo "Mounting Filesystem"
+mkdir -p /media/BOOTPART
+mount ${SELECTEDIDENTIFIER}"1" /media/BOOTPART
+
+mkdir -p /media/LINUXPART
+mount ${SELECTEDIDENTIFIER}"2" /media/LINUXPART
+
+echo "SDCard is prepared and ready for copying of boot loader files"
 
