@@ -1,6 +1,11 @@
 #!/bin/bash
 shopt -s extglob
 
+if [ "`whoami`" != "root" ]; then
+        echo "Please run this script as root."
+        exit 1
+fi
+
 # Text color variables
 txtund=$(tput sgr 0 1)          # Underline
 txtbld=$(tput bold)             # Bold
@@ -20,34 +25,39 @@ function print_error {
 
 function print_drives {
 
-	COUNTER=0
+	index=0
 
-	echo "${bldgrn}The following fixed disks were detected on your machine."
+	echo "${bldgrn}The following removable disks smaller than 10GB detected on your machine."
 
 	# build fixed disk selection list
-	for mLine in `/bin/egrep '[sh]d[a-z]+$' /proc/partitions`; 
+	for ll in /sys/class/block/sd?/removable ; 
 	do   
-		if [ `expr $COUNTER % 4` -eq "2" ] ; then
-			LASTSIZE=`expr $mLine \* 1024`;
+		if [ `cat $ll` == 1 ]; then
+			devfound=`echo $ll | awk -F "/" {'print $5 '}`
+			model=`cat /sys/class/block/$devfound/device/model`
+			vendor=`cat /sys/class/block/$devfound/device/vendor`
+			size=$((`cat /sys/class/block/$devfound/size`/1024/2))
+			if [ "$size" -gt "10000" ]; then
+				continue;
+			fi
+
+			echo "[$index]: $vendor -- $model ( $devfound ) size is $size MBytes. "
+		
+			identifier="/dev/$devfound"
+			drives[$index]="$identifier"
+			sizes[$identifier]=$size
+			
+			index=$(($index+1))
 		fi
-
-		if [ `expr $COUNTER % 4` -eq "3" ] ; then
-
-			let bytes=$LASTSIZE;
-			let mbsize=`expr $bytes / 1024`;
-
-			printf "%s - %d bytes (%d MB)\n" "$mLine" $bytes $mbsize;
-			IDENTIFIER="/dev/$mLine";
-			drives[$CHOICE]="$IDENTIFIER";
-			sizes[$IDENTIFIER]=$LASTSIZE;
-
-			let CHOICE=CHOICE+1;
-		fi
-
-		let COUNTER=COUNTER+1
 	done
 
 	echo $txtrst
+
+	if [ "$index" == "0" ] ; then
+		echo
+		echo "No removable devices found !"
+		exit 1
+	fi
 }
 
 # main script begins below
@@ -130,20 +140,27 @@ let INDEX=INDEX-1
 
 clear
 
-BYTES=${sizes[$SELECTEDIDENTIFIER]}
+echo "Umounting all partitions of $SELECTEDIDENTIFIER."
+ 
+for ii in $SPREF/$DRIVE? ; do
+        umount /dev/`echo $ii | awk -F "/" {'print $5 '}` 2>/dev/null
+done
+ 
+echo "Partitioning"
+BYTES=$((${sizes[$SELECTEDIDENTIFIER]}*1024*1024))
 
 HEADS=255
 SECTORS=63
 CYLINDERS=$(($BYTES/$HEADS/$SECTORS/512))
 
 echo "Clearing Partition Table"
-fdisk $SELECTEDIDENTIFIER >/dev/null 2>&1 <<EOF
+fdisk $SELECTEDIDENTIFIER /dev/null 2>&1 <<EOF
 o
 w
 EOF
 
 echo "Setting Up Partitions"
-fdisk $SELECTEDIDENTIFIER >/dev/null 2>&1 <<EOF
+fdisk $SELECTEDIDENTIFIER > /dev/null 2>&1 <<EOF
 x
 h
 255
@@ -174,13 +191,7 @@ mkfs.msdos -F 32 $SELECTEDIDENTIFIER"1" -n BOOTPART > /dev/null 2>&1
 
 echo "Formatting Linux Partition"
 mkfs.ext3 $SELECTEDIDENTIFIER"2" -L LINUXPART > /dev/null 2>&1
-
-echo "Mounting Filesystem"
-mkdir -p /media/BOOTPART
-mount ${SELECTEDIDENTIFIER}"1" /media/BOOTPART
-
-mkdir -p /media/LINUXPART
-mount ${SELECTEDIDENTIFIER}"2" /media/LINUXPART
+sync
 
 echo ""
 echo "${bldwht}SDCard is prepared and ready for copying of boot loader files"
