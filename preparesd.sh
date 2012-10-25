@@ -154,7 +154,7 @@ SECTORS=63
 CYLINDERS=$(($BYTES/$HEADS/$SECTORS/512))
 
 echo "Clearing Partition Table"
-fdisk $SELECTEDIDENTIFIER /dev/null 2>&1 <<EOF
+fdisk $SELECTEDIDENTIFIER > /dev/null 2>&1 <<EOF
 o
 w
 EOF
