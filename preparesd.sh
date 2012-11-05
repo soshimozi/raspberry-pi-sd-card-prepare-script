@@ -147,17 +147,24 @@ for ii in $SPREF/$DRIVE? ; do
 done
  
 echo "Partitioning"
-BYTES=$((${sizes[$SELECTEDIDENTIFIER]}*1024*1024))
+#BYTES=$((${sizes[$SELECTEDIDENTIFIER]}*1024*1024))
+
+SIZE=`fdisk -l $SELECTEDIDENTIFIER | grep Disk | awk '{print $5}'`
+
+echo DISK SIZE - $SIZE bytes
 
 HEADS=255
 SECTORS=63
-CYLINDERS=$(($BYTES/$HEADS/$SECTORS/512))
+CYLINDERS=`echo $SIZE/$HEADS/$SECTORS/512 | bc`
+
+echo CYLINDERS - $CYLINDERS
 
 echo "Clearing Partition Table"
 fdisk $SELECTEDIDENTIFIER > /dev/null 2>&1 <<EOF
 o
 w
 EOF
+sync
 
 echo "Setting Up Partitions"
 fdisk $SELECTEDIDENTIFIER > /dev/null 2>&1 <<EOF
@@ -185,6 +192,7 @@ p
 
 w
 EOF
+sync
 
 echo "Formatting Boot Partition"
 mkfs.msdos -F 32 $SELECTEDIDENTIFIER"1" -n BOOTPART > /dev/null 2>&1 
